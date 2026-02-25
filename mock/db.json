@@ -1,0 +1,64 @@
+{
+  "me": {
+    "id": "u_001",
+    "email": "admin@demo.com",
+    "firstName": "Breror",
+    "lastName": "Rexha",
+    "role": "admin"
+  },
+  "users": [
+    {
+      "id": "u_001",
+      "email": "admin@demo.com",
+      "firstName": "Breror",
+      "lastName": "Rexha",
+      "role": "admin",
+      "status": "active",
+      "createdAt": "2026-02-01T10:00:00.000Z"
+    },
+    {
+      "id": "u_002",
+      "email": "support@demo.com",
+      "firstName": "John",
+      "lastName": "Doe",
+      "role": "support",
+      "status": "active",
+      "createdAt": "2026-02-10T12:10:00.000Z"
+    }
+  ],
+  "orders": [
+    {
+      "id": "o_1001",
+      "orderNumber": "ORD-1001",
+      "userId": "u_002",
+      "status": "paid",
+      "total": 129.9,
+      "currency": "EUR",
+      "createdAt": "2026-02-20T14:20:00.000Z"
+    },
+    {
+      "id": "o_1002",
+      "orderNumber": "ORD-1002",
+      "userId": "u_001",
+      "status": "processing",
+      "total": 59,
+      "currency": "EUR",
+      "createdAt": "2026-02-21T09:05:00.000Z"
+    }
+  ],
+  "activityEvents": [
+    {
+      "id": "a_1",
+      "type": "USER_CREATED",
+      "actorUserId": "u_001",
+      "createdAt": "2026-02-20T14:25:00.000Z",
+      "meta": { "targetUserId": "u_002" }
+    }
+  ],
+  "revenueDaily": [
+    { "date": "2026-02-18", "revenue": 1200.5, "orders": 31 },
+    { "date": "2026-02-19", "revenue": 980, "orders": 24 },
+    { "date": "2026-02-20", "revenue": 1500, "orders": 40 },
+    { "date": "2026-02-21", "revenue": 760.2, "orders": 18 }
+  ]
+}
