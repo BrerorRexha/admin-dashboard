@@ -4,7 +4,14 @@
     "email": "admin@demo.com",
     "firstName": "Breror",
     "lastName": "Rexha",
-    "role": "admin"
+    "role": "admin",
+    "avatar": "https://i.pravatar.cc/150?u=u_001"
+  },
+  "summaryStats": {
+    "totalRevenue": { "value": 15420.5, "currency": "EUR", "trend": "+12.5%" },
+    "totalOrders": { "value": 342, "trend": "+8.2%" },
+    "activeUsers": { "value": 1284, "trend": "+3.1%" },
+    "pendingTickets": { "value": 14, "trend": "-5.0%" }
   },
   "users": [
     {
@@ -24,26 +31,142 @@
       "role": "support",
       "status": "active",
       "createdAt": "2026-02-10T12:10:00.000Z"
+    },
+    {
+      "id": "u_003",
+      "email": "m.smith@example.com",
+      "firstName": "Maria",
+      "lastName": "Smith",
+      "role": "customer",
+      "status": "active",
+      "createdAt": "2026-02-15T08:30:00.000Z"
+    },
+    {
+      "id": "u_004",
+      "email": "david.j@example.com",
+      "firstName": "David",
+      "lastName": "Jones",
+      "role": "customer",
+      "status": "inactive",
+      "createdAt": "2026-02-16T14:45:00.000Z"
+    },
+    {
+      "id": "u_005",
+      "email": "elena.r@example.com",
+      "firstName": "Elena",
+      "lastName": "Rodriguez",
+      "role": "customer",
+      "status": "banned",
+      "createdAt": "2026-02-18T09:15:00.000Z"
+    }
+  ],
+  "products": [
+    {
+      "id": "p_101",
+      "name": "Wireless Noise-Canceling Headphones",
+      "sku": "AUDIO-001",
+      "category": "Electronics",
+      "price": 299.0,
+      "stock": 45,
+      "status": "in_stock"
+    },
+    {
+      "id": "p_102",
+      "name": "Ergonomic Office Chair",
+      "sku": "FURN-024",
+      "category": "Furniture",
+      "price": 199.5,
+      "stock": 12,
+      "status": "low_stock"
+    },
+    {
+      "id": "p_103",
+      "name": "Mechanical Keyboard - Pro Edition",
+      "sku": "COMP-089",
+      "category": "Electronics",
+      "price": 129.9,
+      "stock": 0,
+      "status": "out_of_stock"
+    },
+    {
+      "id": "p_104",
+      "name": "Annual Cloud Storage (1TB)",
+      "sku": "SUBS-100",
+      "category": "Digital",
+      "price": 59.0,
+      "stock": 9999,
+      "status": "in_stock"
     }
   ],
   "orders": [
     {
       "id": "o_1001",
       "orderNumber": "ORD-1001",
-      "userId": "u_002",
-      "status": "paid",
+      "userId": "u_003",
+      "status": "delivered",
       "total": 129.9,
       "currency": "EUR",
-      "createdAt": "2026-02-20T14:20:00.000Z"
+      "paymentMethod": "Credit Card",
+      "createdAt": "2026-02-18T14:20:00.000Z"
     },
     {
       "id": "o_1002",
       "orderNumber": "ORD-1002",
-      "userId": "u_001",
+      "userId": "u_004",
       "status": "processing",
-      "total": 59,
+      "total": 59.0,
       "currency": "EUR",
+      "paymentMethod": "PayPal",
       "createdAt": "2026-02-21T09:05:00.000Z"
+    },
+    {
+      "id": "o_1003",
+      "orderNumber": "ORD-1003",
+      "userId": "u_005",
+      "status": "refunded",
+      "total": 299.0,
+      "currency": "EUR",
+      "paymentMethod": "Credit Card",
+      "createdAt": "2026-02-22T11:30:00.000Z"
+    },
+    {
+      "id": "o_1004",
+      "orderNumber": "ORD-1004",
+      "userId": "u_003",
+      "status": "shipped",
+      "total": 199.5,
+      "currency": "EUR",
+      "paymentMethod": "Apple Pay",
+      "createdAt": "2026-02-24T16:15:00.000Z"
+    }
+  ],
+  "tickets": [
+    {
+      "id": "t_501",
+      "userId": "u_003",
+      "subject": "Where is my order?",
+      "status": "open",
+      "priority": "high",
+      "assignedTo": "u_002",
+      "createdAt": "2026-02-25T08:12:00.000Z"
+    },
+    {
+      "id": "t_502",
+      "userId": "u_004",
+      "subject": "Cannot update billing information",
+      "status": "in_progress",
+      "priority": "medium",
+      "assignedTo": "u_002",
+      "createdAt": "2026-02-24T10:45:00.000Z"
+    },
+    {
+      "id": "t_503",
+      "userId": "u_005",
+      "subject": "Refund request for ORD-1003",
+      "status": "closed",
+      "priority": "low",
+      "assignedTo": "u_001",
+      "createdAt": "2026-02-22T14:20:00.000Z"
     }
   ],
   "activityEvents": [
@@ -52,13 +175,72 @@
       "type": "USER_CREATED",
       "actorUserId": "u_001",
       "createdAt": "2026-02-20T14:25:00.000Z",
-      "meta": { "targetUserId": "u_002" }
+      "meta": {
+        "targetUserId": "u_002",
+        "description": "Admin created new Support account"
+      }
+    },
+    {
+      "id": "a_2",
+      "type": "ORDER_PLACED",
+      "actorUserId": "u_004",
+      "createdAt": "2026-02-21T09:05:00.000Z",
+      "meta": {
+        "orderId": "o_1002",
+        "description": "Order placed for 59.00 EUR"
+      }
+    },
+    {
+      "id": "a_3",
+      "type": "REFUND_ISSUED",
+      "actorUserId": "u_001",
+      "createdAt": "2026-02-23T10:00:00.000Z",
+      "meta": {
+        "orderId": "o_1003",
+        "description": "Refunded 299.00 EUR to u_005"
+      }
+    },
+    {
+      "id": "a_4",
+      "type": "SYSTEM_ALERT",
+      "actorUserId": "system",
+      "createdAt": "2026-02-25T01:00:00.000Z",
+      "meta": {
+        "productId": "p_103",
+        "description": "Inventory depleted for COMP-089"
+      }
+    }
+  ],
+  "notifications": [
+    {
+      "id": "n_1",
+      "title": "New support ticket assigned",
+      "read": false,
+      "type": "ticket",
+      "createdAt": "2026-02-25T08:15:00.000Z"
+    },
+    {
+      "id": "n_2",
+      "title": "Product 'Mechanical Keyboard' is out of stock",
+      "read": false,
+      "type": "inventory",
+      "createdAt": "2026-02-25T01:05:00.000Z"
+    },
+    {
+      "id": "n_3",
+      "title": "Daily server backup completed",
+      "read": true,
+      "type": "system",
+      "createdAt": "2026-02-24T03:00:00.000Z"
     }
   ],
   "revenueDaily": [
-    { "date": "2026-02-18", "revenue": 1200.5, "orders": 31 },
-    { "date": "2026-02-19", "revenue": 980, "orders": 24 },
-    { "date": "2026-02-20", "revenue": 1500, "orders": 40 },
-    { "date": "2026-02-21", "revenue": 760.2, "orders": 18 }
+    { "date": "2026-02-19", "revenue": 980.0, "orders": 24 },
+    { "date": "2026-02-20", "revenue": 1500.0, "orders": 40 },
+    { "date": "2026-02-21", "revenue": 760.2, "orders": 18 },
+    { "date": "2026-02-22", "revenue": 2100.5, "orders": 52 },
+    { "date": "2026-02-23", "revenue": 1850.0, "orders": 45 },
+    { "date": "2026-02-24", "revenue": 2450.75, "orders": 60 },
+    { "date": "2026-02-25", "revenue": 1120.0, "orders": 28 }
   ]
 }

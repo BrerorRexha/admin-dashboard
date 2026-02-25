@@ -16,6 +16,7 @@ export function AppLayout() {
 
   const items: NavItem[] = [
     { label: "Dashboard", to: "/dashboard", permission: "analytics.read" },
+    { label: "Products", to: "/products", permission: "products.read" },
     { label: "Users", to: "/users", permission: "users.read" },
     { label: "Orders", to: "/orders", permission: "orders.read" },
     { label: "Settings", to: "/settings" }

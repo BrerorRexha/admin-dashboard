@@ -6,6 +6,7 @@ import Dashboard from "../pages/Dashboard";
 import Users from "../pages/Users";
 import Orders from "../pages/Orders";
 import Settings from "../pages/Settings";
+import Products from "../pages/Products";
 
 const rootRoute = createRootRoute({
   component: () => <Outlet />
@@ -23,6 +24,12 @@ const indexRoute = createRoute({
   beforeLoad: () => {
     throw redirect({ to: "/dashboard" });
   }
+});
+
+const productsRoute = createRoute({
+  getParentRoute: () => layoutRoute,
+  path: "/products",
+  component: Products
 });
 
 const dashboardRoute = createRoute({
@@ -50,7 +57,7 @@ const settingsRoute = createRoute({
 });
 
 const routeTree = rootRoute.addChildren([
-  layoutRoute.addChildren([indexRoute, dashboardRoute, usersRoute, ordersRoute, settingsRoute])
+  layoutRoute.addChildren([indexRoute, dashboardRoute, productsRoute, usersRoute, ordersRoute, settingsRoute])
 ]);
 
 export const router = createRouter({ routeTree });

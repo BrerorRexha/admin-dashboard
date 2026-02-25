@@ -12,7 +12,7 @@ type AuthContextValue = {
 const AuthContext = React.createContext<AuthContextValue | undefined>(undefined);
 
 const rolePermissions: Record<UserRole, string[]> = {
-  admin: ["users.read", "users.write", "orders.read", "orders.write", "analytics.read"],
+  admin: ["users.read", "users.write", "orders.read", "orders.write", "analytics.read", "products.read", "products.write"],
   support: ["users.read", "orders.read"],
   viewer: ["analytics.read"]
 };

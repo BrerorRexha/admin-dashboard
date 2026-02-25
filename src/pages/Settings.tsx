@@ -12,7 +12,7 @@ export default function Settings() {
         <CardContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <Typography variant="subtitle1">Profile</Typography>
 
-          <TextField label="First name" size="small" defaultValue="Ali" />
+          <TextField label="First name" size="small" defaultValue="Breror" />
           <TextField label="Last name" size="small" defaultValue="Rexha" />
           <TextField label="Email" size="small" defaultValue="admin@demo.com" />
 
