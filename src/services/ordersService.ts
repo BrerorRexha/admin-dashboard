@@ -9,19 +9,27 @@ export type OrdersQuery = {
   search: string;
 };
 
+type JsonServerPage<T> = {
+  first: number;
+  prev: number | null;
+  next: number | null;
+  last: number;
+  pages: number;
+  items: number;
+  data: T[];
+};
+
 export async function fetchOrders(q: OrdersQuery): Promise<Paginated<Order>> {
   const params: Record<string, string | number> = {
     _page: q.page,
-    _limit: q.pageSize,
-    _sort: "createdAt",
-    _order: "desc"
+    _per_page: q.pageSize,
   };
 
-  if (q.search.trim()) params.q = q.search.trim();
+  const search = q.search?.trim();
+  if (search) params.q = search;
   if (q.status) params.status = q.status;
 
-  const res = await apiClient.get<Order[]>("/orders", { params });
-  const total = Number(res.headers["x-total-count"] ?? 0);
+  const res = await apiClient.get<JsonServerPage<Order>>("/orders", { params });
 
-  return { items: res.data, total };
+  return { items: res.data.data, total: res.data.items };
 }

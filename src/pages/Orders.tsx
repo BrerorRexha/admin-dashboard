@@ -1,6 +1,6 @@
 import { Box, MenuItem, TextField, Typography } from "@mui/material";
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 
 import { DataTable } from "../components/table/DataTable";
@@ -16,7 +16,7 @@ export default function Orders() {
   const query = useQuery({
     queryKey: ["orders", { page, pageSize, status, search }],
     queryFn: () => fetchOrders({ page, pageSize, status: status as any, search }),
-    // keepPreviousData: true
+    placeholderData: keepPreviousData
   });
 
   const columns = useMemo<ColumnDef<Order>[]>(() => {

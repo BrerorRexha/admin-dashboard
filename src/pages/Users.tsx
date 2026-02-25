@@ -1,6 +1,6 @@
 import { Box, Button, MenuItem, TextField, Typography } from "@mui/material";
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 
 import { DataTable } from "../components/table/DataTable";
@@ -19,7 +19,7 @@ export default function Users() {
   const query = useQuery({
     queryKey: ["users", { page, pageSize, search, role }],
     queryFn: () => fetchUsers({ page, pageSize, search, role }),
-    // keepPreviousData: true
+    placeholderData: keepPreviousData
   });
 
   const columns = useMemo<ColumnDef<User>[]>(() => {

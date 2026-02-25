@@ -13,21 +13,29 @@ export type Paginated<T> = {
   total: number;
 };
 
+type JsonServerPage<T> = {
+  first: number;
+  prev: number | null;
+  next: number | null;
+  last: number;
+  pages: number;
+  items: number;
+  data: T[];
+};
+
 export async function fetchUsers(q: UsersQuery): Promise<Paginated<User>> {
   const params: Record<string, string | number> = {
     _page: q.page,
-    _limit: q.pageSize,
-    _sort: "createdAt",
-    _order: "desc"
+    _per_page: q.pageSize,
   };
 
   if (q.search.trim()) params.q = q.search.trim();
   if (q.role) params.role = q.role;
 
-  const res = await apiClient.get<User[]>("/users", { params });
+  const res = await apiClient.get<JsonServerPage<User>>("/users", { params });
   const total = Number(res.headers["x-total-count"] ?? 0);
 
-  return { items: res.data, total };
+  return { items: res.data.data, total };
 }
 
 export async function createUser(payload: Omit<User, "id" | "createdAt">): Promise<User> {
