@@ -1,79 +1,201 @@
-import { Box, MenuItem, TextField, Typography } from "@mui/material";
 import { useMemo, useState } from "react";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import type { ColumnDef } from "@tanstack/react-table";
+import {
+  Box,
+  Chip,
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+  Typography,
+} from "@mui/material";
+import { EditOutlined } from "@mui/icons-material";
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import {
+  MaterialReactTable,
+  useMaterialReactTable,
+  type MRT_ColumnDef,
+} from "material-react-table";
 
-import { DataTable } from "../components/table/DataTable";
-import type { Order } from "../types/order";
-import { fetchOrders } from "../services/ordersService";
+import type { Order, OrderStatus } from "../types";
+import { fetchOrders, updateOrderStatus } from "../services/ordersService";
+
+const STATUS_COLORS: Record<OrderStatus, "warning" | "info" | "success"> = {
+  processing: "warning",
+  processed: "info",
+  delivered: "success",
+};
+const STATUS_LABEL: Record<OrderStatus, string> = {
+  processing: "Processing",
+  processed: "Processed",
+  delivered: "Delivered",
+};
+
+function OrderStatusChip({ status }: { status: OrderStatus }) {
+  return (
+    <Chip
+      label={STATUS_LABEL[status]}
+      color={STATUS_COLORS[status]}
+      size="small"
+      variant="outlined"
+    />
+  );
+}
+
+function StatusEditor({ order }: { order: Order }) {
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const mut = useMutation({
+    mutationFn: (status: OrderStatus) => updateOrderStatus(order.id, status),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["orders"] });
+      setOpen(false);
+    },
+  });
+
+  if (!open) {
+    return (
+      <Stack direction="row" alignItems="center" spacing={0.5}>
+        <OrderStatusChip status={order.status} />
+        <IconButton size="small" onClick={() => setOpen(true)}>
+          <EditOutlined sx={{ fontSize: 14 }} />
+        </IconButton>
+      </Stack>
+    );
+  }
+
+  return (
+    <FormControl size="small" sx={{ minWidth: 140 }}>
+      <InputLabel>Status</InputLabel>
+      <Select
+        value={order.status}
+        label="Status"
+        onChange={(e) => mut.mutate(e.target.value as OrderStatus)}
+        autoFocus
+        onBlur={() => setOpen(false)}
+      >
+        <MenuItem value="processing">Processing</MenuItem>
+        <MenuItem value="processed">Processed</MenuItem>
+        <MenuItem value="delivered">Delivered</MenuItem>
+      </Select>
+    </FormControl>
+  );
+}
 
 export default function Orders() {
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [status, setStatus] = useState("");
+  const [statusFilter, setStatusFilter] = useState<OrderStatus | "">("");
   const [search, setSearch] = useState("");
 
   const query = useQuery({
-    queryKey: ["orders", { page, pageSize, status, search }],
-    queryFn: () => fetchOrders({ page, pageSize, status: status as any, search }),
-    placeholderData: keepPreviousData
+    queryKey: [
+      "orders",
+      { page: page + 1, pageSize, status: statusFilter, search },
+    ],
+    queryFn: () =>
+      fetchOrders({ page: page + 1, pageSize, status: statusFilter, search }),
+    placeholderData: keepPreviousData,
   });
 
-  const columns = useMemo<ColumnDef<Order>[]>(() => {
-    return [
-      { header: "Order", accessorKey: "orderNumber" },
-      { header: "Status", accessorKey: "status" },
-      { header: "Total", cell: ctx => `${ctx.row.original.total.toFixed(2)} ${ctx.row.original.currency}` },
-      { header: "Created", cell: ctx => new Date(ctx.row.original.createdAt).toLocaleString() }
-    ];
-  }, []);
+  const columns = useMemo<MRT_ColumnDef<Order>[]>(
+    () => [
+      {
+        accessorKey: "orderNumber",
+        header: "Order",
+        Cell: ({ row }) => (
+          <Typography variant="body2" fontWeight={600}>
+            {row.original.orderNumber}
+          </Typography>
+        ),
+      },
+      { accessorKey: "customerName", header: "Customer" },
+      {
+        accessorKey: "status",
+        header: "Status",
+        Cell: ({ row }) => <StatusEditor order={row.original} />,
+      },
+      {
+        accessorKey: "total",
+        header: "Total",
+        Cell: ({ row }) => (
+          <Typography variant="body2">
+            \u20AC{row.original.total.toFixed(2)}
+          </Typography>
+        ),
+      },
+      {
+        accessorKey: "createdAt",
+        header: "Date",
+        Cell: ({ row }) => (
+          <Typography variant="body2">
+            {new Date(row.original.createdAt).toLocaleDateString()}
+          </Typography>
+        ),
+      },
+    ],
+    [],
+  );
+
+  const table = useMaterialReactTable({
+    columns,
+    data: query.data?.items ?? [],
+    manualPagination: true,
+    rowCount: query.data?.total ?? 0,
+    initialState: { sorting: [{ id: "createdAt", desc: true }] },
+    state: {
+      pagination: { pageIndex: page, pageSize },
+      isLoading: query.isLoading,
+      globalFilter: search,
+    },
+    onPaginationChange: (u) => {
+      const n = typeof u === "function" ? u({ pageIndex: page, pageSize }) : u;
+      setPage(n.pageIndex);
+      setPageSize(n.pageSize);
+    },
+    onGlobalFilterChange: (v: string) => {
+      setSearch(v);
+      setPage(0);
+    },
+    enableColumnActions: false,
+    enableDensityToggle: false,
+    enableFullScreenToggle: false,
+    muiTablePaperProps: {
+      elevation: 0,
+      sx: { border: "1px solid", borderColor: "divider", borderRadius: 2 },
+    },
+    renderTopToolbarCustomActions: () => (
+      <FormControl size="small" sx={{ minWidth: 160 }}>
+        <InputLabel>Filter by status</InputLabel>
+        <Select
+          value={statusFilter}
+          label="Filter by status"
+          onChange={(e) => {
+            setStatusFilter(e.target.value as OrderStatus | "");
+            setPage(0);
+          }}
+        >
+          <MenuItem value="">All statuses</MenuItem>
+          <MenuItem value="processing">Processing</MenuItem>
+          <MenuItem value="processed">Processed</MenuItem>
+          <MenuItem value="delivered">Delivered</MenuItem>
+        </Select>
+      </FormControl>
+    ),
+  });
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <Typography variant="h5">Orders</Typography>
-
-      <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-        <TextField
-          size="small"
-          label="Search"
-          value={search}
-          onChange={e => {
-            setPage(1);
-            setSearch(e.target.value);
-          }}
-        />
-
-        <TextField
-          size="small"
-          select
-          label="Status"
-          value={status}
-          onChange={e => {
-            setPage(1);
-            setStatus(e.target.value);
-          }}
-          sx={{ minWidth: 200 }}
-        >
-          <MenuItem value="">All</MenuItem>
-          <MenuItem value="paid">Paid</MenuItem>
-          <MenuItem value="processing">Processing</MenuItem>
-          <MenuItem value="shipped">Shipped</MenuItem>
-          <MenuItem value="cancelled">Cancelled</MenuItem>
-        </TextField>
-      </Box>
-
-      <DataTable<Order>
-        columns={columns}
-        rows={query.data?.items ?? []}
-        total={query.data?.total ?? 0}
-        page={page}
-        pageSize={pageSize}
-        onPageChange={setPage}
-        onPageSizeChange={n => {
-          setPage(1);
-          setPageSize(n);
-        }}
-      />
+      <Typography variant="h5" fontWeight={700}>
+        Orders
+      </Typography>
+      <MaterialReactTable table={table} />
     </Box>
   );
 }

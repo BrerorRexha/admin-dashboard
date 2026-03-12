@@ -1,35 +1,46 @@
-import type { Order, OrderStatus } from "../types/order";
-import { apiClient } from "./apiClient";
-import type { Paginated } from "./usersService";
+import type { Order, OrderStatus } from "../types";
+import { mockOrders } from "../data/mockData";
+import { delay, newId, paginate } from "./mockService";
 
-export type OrdersQuery = {
-  page: number;
-  pageSize: number;
-  status: OrderStatus | "";
-  search: string;
-};
+let store: Order[] = [...mockOrders];
 
-type JsonServerPage<T> = {
-  first: number;
-  prev: number | null;
-  next: number | null;
-  last: number;
-  pages: number;
-  items: number;
-  data: T[];
-};
+export async function fetchOrders(params?: {
+  page?: number;
+  pageSize?: number;
+  status?: OrderStatus | "";
+  search?: string;
+}) {
+  await delay();
+  let items = [...store].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+  if (params?.status) items = items.filter((o) => o.status === params.status);
+  if (params?.search) {
+    const q = params.search.toLowerCase();
+    items = items.filter(
+      (o) =>
+        o.orderNumber.toLowerCase().includes(q) ||
+        o.customerName.toLowerCase().includes(q)
+    );
+  }
+  return paginate(items, params?.page ?? 1, params?.pageSize ?? 10);
+}
 
-export async function fetchOrders(q: OrdersQuery): Promise<Paginated<Order>> {
-  const params: Record<string, string | number> = {
-    _page: q.page,
-    _per_page: q.pageSize,
-  };
+export async function fetchOrderById(id: string): Promise<Order | null> {
+  await delay();
+  return store.find((o) => o.id === id) ?? null;
+}
 
-  const search = q.search?.trim();
-  if (search) params.q = search;
-  if (q.status) params.status = q.status;
+export async function updateOrderStatus(id: string, status: OrderStatus): Promise<Order> {
+  await delay();
+  const idx = store.findIndex((o) => o.id === id);
+  if (idx === -1) throw new Error("Order not found");
+  const updated = { ...store[idx], status };
+  store = store.map((o) => (o.id === id ? updated : o));
+  return updated;
+}
 
-  const res = await apiClient.get<JsonServerPage<Order>>("/orders", { params });
-
-  return { items: res.data.data, total: res.data.items };
+export async function deleteOrder(id: string): Promise<void> {
+  await delay();
+  store = store.filter((o) => o.id !== id);
 }

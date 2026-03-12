@@ -1,45 +1,53 @@
-import React from "react";
-import { useQuery } from "@tanstack/react-query";
-import type { Me, UserRole } from "../types/user";
-import { fetchMe } from "../services/authService";
+import React, { createContext, useContext, useState } from "react";
+import type { Me, Permission } from "../types";
+import { mockMe, mockRoles } from "../data/mockData";
+
+const ME_KEY = "admin_me";
+
+function loadMe(): Me {
+  try {
+    const raw = localStorage.getItem(ME_KEY);
+    if (raw) return { ...mockMe, ...JSON.parse(raw) };
+  } catch {
+    // ignore
+  }
+  return { ...mockMe };
+}
+
+function saveMe(me: Me) {
+  localStorage.setItem(ME_KEY, JSON.stringify(me));
+}
 
 type AuthContextValue = {
-  me: Me | null;
-  role: UserRole | null;
-  can: (permission: string) => boolean;
+  me: Me;
+  setMe: (me: Me) => void;
+  can: (permission: Permission) => boolean;
 };
 
-const AuthContext = React.createContext<AuthContextValue | undefined>(undefined);
-
-const rolePermissions: Record<UserRole, string[]> = {
-  admin: ["users.read", "users.write", "orders.read", "orders.write", "analytics.read", "products.read", "products.write"],
-  support: ["users.read", "orders.read"],
-  viewer: ["analytics.read"]
-};
+const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { data } = useQuery({
-    queryKey: ["me"],
-    queryFn: fetchMe
-  });
+  const [me, setMeState] = useState<Me>(loadMe);
 
-  const me = data ?? null;
-  const role = me?.role ?? null;
+  function setMe(next: Me) {
+    setMeState(next);
+    saveMe(next);
+  }
 
-  const can = (permission: string) => {
-    if (!role) return false;
-    return rolePermissions[role].includes(permission);
+  const can = (permission: Permission): boolean => {
+    const role = mockRoles.find((r) => r.id === me.roleId);
+    return role?.permissions.includes(permission) ?? false;
   };
 
   return (
-    <AuthContext.Provider value={{ me, role, can }}>
+    <AuthContext.Provider value={{ me, setMe, can }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
 export function useAuth() {
-  const ctx = React.useContext(AuthContext);
+  const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
 }

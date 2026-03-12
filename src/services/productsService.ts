@@ -1,52 +1,73 @@
-import type { Product } from "../types/product";
-import { apiClient } from "./apiClient";
+import type { Product, ProductStatus } from "../types";
+import { mockProducts } from "../data/mockData";
+import { delay, newId, paginate } from "./mockService";
 
-export type ProductsQuery = {
-  page: number;
-  pageSize: number;
+let store: Product[] = [...mockProducts];
+
+const toStatus = (stock: number): ProductStatus => (stock > 0 ? "in_stock" : "out_of_stock");
+
+export async function fetchProducts(params?: {
+  page?: number;
+  pageSize?: number;
+  categoryId?: string;
+  status?: ProductStatus | "";
+  search?: string;
+}) {
+  await delay();
+  let items = [...store].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+  if (params?.categoryId) items = items.filter((p) => p.categoryId === params.categoryId);
+  if (params?.status) items = items.filter((p) => p.status === params.status);
+  if (params?.search) {
+    const q = params.search.toLowerCase();
+    items = items.filter((p) => p.name.toLowerCase().includes(q));
+  }
+  return paginate(items, params?.page ?? 1, params?.pageSize ?? 10);
+}
+
+export async function fetchProductById(id: string): Promise<Product | null> {
+  await delay();
+  return store.find((p) => p.id === id) ?? null;
+}
+
+export async function createProduct(data: {
   name: string;
-  category: string;
-};
-
-export type Paginated<T> = {
-  items: T[];
-  total: number;
-};
-
-type JsonServerPage<T> = {
-  first: number;
-  prev: number | null;
-  next: number | null;
-  last: number;
-  pages: number;
-  items: number;
-  data: T[];
-};
-
-export async function fetchProducts(q: ProductsQuery): Promise<Paginated<Product>> {
-  const params: Record<string, string | number> = {
-    _page: q.page,
-    _per_page: q.pageSize,
+  description: string;
+  stock: number;
+  price: number;
+  images: string[];
+  categoryId: string;
+  specValues: string[];
+}): Promise<Product> {
+  await delay();
+  const product: Product = {
+    id: newId("prod"),
+    ...data,
+    status: toStatus(data.stock),
+    createdAt: new Date().toISOString(),
   };
-
-  if (q.name.trim()) params.q = q.name.trim();
-  if (q.category) params.category = q.category;
-
-  const res = await apiClient.get<JsonServerPage<Product>>("/products", { params });
-  const total = Number(res.headers["x-total-count"] ?? 0);
-
-  return { items: res.data.data, total };
+  store = [...store, product];
+  return product;
 }
 
-export async function createProduct(payload: Omit<Product, "id" | "createdAt">): Promise<Product> {
-  const res = await apiClient.post<Product>("/products", {
-    ...payload,
-    createdAt: new Date().toISOString()
-  });
-  return res.data;
+export async function updateProduct(
+  id: string,
+  data: Partial<Omit<Product, "id" | "createdAt" | "status">>
+): Promise<Product> {
+  await delay();
+  const idx = store.findIndex((p) => p.id === id);
+  if (idx === -1) throw new Error("Product not found");
+  const updated: Product = {
+    ...store[idx],
+    ...data,
+    status: data.stock !== undefined ? toStatus(data.stock) : store[idx].status,
+  };
+  store = store.map((p) => (p.id === id ? updated : p));
+  return updated;
 }
 
-export async function updateProduct(id: string, payload: Partial<Product>): Promise<Product> {
-  const res = await apiClient.patch<Product>(`/products/${id}`, payload);
-  return res.data;
+export async function deleteProduct(id: string): Promise<void> {
+  await delay();
+  store = store.filter((p) => p.id !== id);
 }
