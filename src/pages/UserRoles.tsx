@@ -29,7 +29,7 @@ import {
   type MRT_ColumnDef,
 } from "material-react-table";
 
-import { ALL_PERMISSIONS, type Permission, type UserRole } from "../types";
+import { type Permission, type UserRole } from "../types";
 import {
   fetchUserRoles,
   createUserRole,

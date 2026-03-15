@@ -1,6 +1,6 @@
 import type { Order, OrderStatus } from "../types";
 import { mockOrders } from "../data/mockData";
-import { delay, newId, paginate } from "./mockService";
+import { delay, paginate } from "./mockService";
 
 let store: Order[] = [...mockOrders];
 

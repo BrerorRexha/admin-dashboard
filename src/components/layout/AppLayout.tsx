@@ -99,7 +99,6 @@ export function AppLayout() {
   );
   const isLight = mode === "light";
 
-  const sidebarBg = isLight ? "#ffffff" : "#1e2418";
   const borderColor = isLight ? "#d8e0c8" : "#2e3a24";
 
   return (
