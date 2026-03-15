@@ -1,73 +1,36 @@
-# React + TypeScript + Vite
+# Admin Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A fully client-side admin dashboard built as a portfolio/job-application demo.
 
-Currently, two official plugins are available:
+> **Note:** This is a frontend-only project. All data is in-memory mock data — there is no backend or database. All CRUD operations work within the session and reset on page refresh (except theme and profile, which persist to `localStorage`).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Tech Stack
 
-## React Compiler
+- **React 19 + TypeScript** — Vite
+- **TanStack Router** — file-based client-side routing
+- **TanStack Query** — data fetching and cache management
+- **TanStack Form** — form state and validation
+- **material-react-table v3** — feature-rich data tables with pagination and search
+- **MUI v7** — component library with custom olive/moss green theme
+- **Recharts** — area and bar charts on the dashboard
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Features
 
-## Expanding the ESLint configuration
+- **Dashboard** — revenue chart, orders-by-status chart, stat cards, recent orders list
+- **Products** — CRUD with image upload (up to 4), category assignment, spec value selection, stock/price validation
+- **Orders** — inline status editing, status filter
+- **Categories** — hierarchical parent/child categories with auto-generated slugs
+- **Specifications & Spec Values** — category-scoped specifications and their selectable values
+- **Users** — user management with role assignment
+- **User Roles** — granular permission management with grouped checkboxes
+- **Settings** — profile photo upload, name/email editing, light/dark mode toggle
+- **Permission-based navigation** — sidebar items filtered by the logged-in user's role
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Running Locally
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Open [http://localhost:5173](http://localhost:5173).
